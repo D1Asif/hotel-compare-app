@@ -1,6 +1,6 @@
-# Hotel Compare App
+# Hotel Compare App - Backend
 
-A web application that compares hotel prices across different booking platforms to help users find the best deals.
+A FastAPI-based backend service that handles hotel data scraping, comparison, and API endpoints.
 
 ## Features
 
@@ -9,11 +9,9 @@ A web application that compares hotel prices across different booking platforms 
 - User authentication and authorization
 - Bookmark favorite hotels
 - Real-time price comparison
-- Responsive design
 
 ## Tech Stack
 
-### Backend
 - FastAPI (Python web framework)
 - Prisma (ORM)
 - Scrapy (Web scraping)
@@ -21,17 +19,10 @@ A web application that compares hotel prices across different booking platforms 
 - JWT Authentication
 - PostgreSQL (Database)
 
-### Frontend
-- React
-- TypeScript
-- Tailwind CSS
-- React Query
-- React Router
-
 ## Project Structure
 
 ```
-hotel-compare-app/
+backend/
 ├── app/
 │   ├── main.py              # FastAPI application
 │   ├── schemas.py           # Pydantic models
@@ -51,45 +42,67 @@ hotel-compare-app/
 
 ### Prerequisites
 - Python 3.8+
-- Node.js 14+
 - PostgreSQL
 - Chrome/Chromium (for Selenium)
 
-### Backend Setup
+### Environment Setup
 
-1. Create and activate a virtual environment:
+1. Create a `.env` file in the backend directory with the following variables:
+```env
+# Database
+DATABASE_URL="postgresql://username:password@localhost:5432/hotel_compare"
+
+# JWT
+JWT_SECRET_KEY="your-secret-key"
+JWT_ALGORITHM="HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES=30
+
+# Scraping
+SCRAPING_INTERVAL=3600  # in seconds
+MAX_CONCURRENT_REQUESTS=5
+
+# Optional: Proxy settings if needed
+# PROXY_URL="http://proxy:port"
+```
+
+2. Create and activate a virtual environment:
 ```bash
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 ```
 
-2. Install Python dependencies:
+3. Install Python dependencies:
 ```bash
 pip install -r requirements.txt
 ```
 
-3. Set up the database:
+### Database Setup
+
+1. Create a PostgreSQL database:
+```bash
+createdb hotel_compare
+```
+
+2. Initialize Prisma and apply migrations:
 ```bash
 python init_prisma.py
 ```
 
-4. Start the backend server:
+3. Verify database connection:
+```bash
+python -c "from app.database import prisma; prisma.connect()"
+```
+
+### Running the Application
+
+1. Start the backend server:
 ```bash
 uvicorn app.main:app --reload
 ```
 
-### Frontend Setup
-
-1. Install dependencies:
-```bash
-cd frontend
-npm install
-```
-
-2. Start the development server:
-```bash
-npm run dev
-```
+2. Access the API documentation:
+- Swagger UI: http://localhost:8000/docs
+- ReDoc: http://localhost:8000/redoc
 
 ## API Documentation
 
