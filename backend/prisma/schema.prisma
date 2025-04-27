@@ -1,0 +1,33 @@
+generator client {
+  provider = "prisma-client-py"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int       @id @default(autoincrement())
+  email     String    @unique
+  username  String    @unique
+  password  String
+  createdAt DateTime  @default(now()) @map("created_at")
+  bookmarks Bookmark[]
+
+  @@map("users")
+}
+
+model Bookmark {
+  id          Int      @id @default(autoincrement())
+  hotelName   String   @map("hotel_name")
+  image       String
+  price       Float
+  rating      Float
+  bookingUrl  String   @map("booking_url")
+  createdAt   DateTime @default(now()) @map("created_at")
+  userId      Int      @map("user_id")
+  user        User     @relation(fields: [userId], references: [id])
+
+  @@map("bookmarks")
+} 
