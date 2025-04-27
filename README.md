@@ -17,16 +17,9 @@ cd hotel-compare-app
 ```
 
 2. Set up the backend:
-```bash
-cd backend
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-pip install -r requirements.txt
-python init_prisma.py
-uvicorn app.main:app --reload
-```
+[Backend Documentation](backend/README.md) - Detailed backend setup and API documentation
 
-3. Set up the frontend:
+3. Set up the frontend: (yet to be implemented)
 ```bash
 cd frontend
 npm install
