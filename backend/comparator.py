@@ -41,7 +41,7 @@ def organize_hotel_comparison(grouped_hotels: Dict[str, List[Dict[str, Any]]]) -
         
         # Create comparison entry
         comparison_entry = {
-            'hotel_name': hotel_name,
+            'hotel_name': hotel_name.title(),
             'best_price': best_price,
             'sources': []
         }

@@ -160,10 +160,10 @@ class AgodaSpider(scrapy.Spider):
                     price = float(price_text.replace('BDT', '').replace(',', '').strip())
                     
                     # Apply filters
-                    if (self.min_price and price < self.min_price) or \
-                       (self.max_price and price > self.max_price) or \
-                       (self.star_rating and rating != self.star_rating):
-                        continue
+                    # if (self.min_price and price < self.min_price) or \
+                    #    (self.max_price and price > self.max_price) or \
+                    #    (self.star_rating and rating != self.star_rating):
+                    #     continue
                     
                     # Make sure booking_url is absolute
                     booking_url = response.urljoin(booking_url)

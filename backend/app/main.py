@@ -68,7 +68,7 @@ async def login(user: schemas.LoginSchema, db: Prisma = Depends(get_db)):
         "token_type": "bearer"
     }
 
-@app.get("/search")
+@app.post("/search")
 async def search_hotels(
     search_params: schemas.HotelSearch,
     current_user: schemas.User = Depends(auth.get_current_user),
@@ -169,4 +169,29 @@ async def get_user_bookmarks(
             created_at=bookmark.createdAt
         )
         for bookmark in bookmarks
-    ] 
+    ]
+
+@app.delete("/bookmarks/{bookmark_id}")
+async def delete_bookmark(
+    bookmark_id: int,
+    current_user: User = Depends(auth.get_current_user),
+    db: Prisma = Depends(get_db)
+):
+    # First check if the bookmark exists and belongs to the current user
+    bookmark = await db.bookmark.find_unique(
+        where={"id": bookmark_id},
+        include={"user": True}
+    )
+    
+    if not bookmark:
+        raise HTTPException(status_code=404, detail="Bookmark not found")
+    
+    if bookmark.userId != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized to delete this bookmark")
+    
+    # Delete the bookmark
+    await db.bookmark.delete(
+        where={"id": bookmark_id}
+    )
+    
+    return {"message": "Bookmark deleted successfully"} 
