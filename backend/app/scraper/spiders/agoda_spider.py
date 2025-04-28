@@ -77,9 +77,6 @@ class AgodaSpider(scrapy.Spider):
             self.start_url += f'&hotelStarRating={self.star_rating}'
 
         options = Options()
-        options.add_argument("--disable-background-timer-throttling")
-        options.add_argument("--disable-backgrounding-occluded-windows")
-        options.add_argument("--disable-renderer-backgrounding")
         self.driver = webdriver.Chrome(options=options)
 
     def start_requests(self):
