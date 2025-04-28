@@ -1,24 +1,53 @@
 from typing import List, Dict, Any
 from collections import defaultdict
+from fuzzywuzzy import fuzz
+import re
+
+def normalize_hotel_name(name: str) -> str:
+    """
+    Normalize hotel name by removing common words and formatting.
+    """
+    name = name.lower()
+    name = re.sub(r'[^a-z\s]', '', name)  # Remove non-letter characters
+    words = name.split()
+    stopwords = {'hotel', 'dhaka', 'resort', 'inn', 'the'}
+    filtered_words = [word for word in words if word not in stopwords]
+    normalized_name = ' '.join(filtered_words)
+    return normalized_name.strip()
 
 def group_hotels_by_name(hotels: List[Dict[str, Any]]) -> Dict[str, List[Dict[str, Any]]]:
     """
-    Group hotels by their names to compare prices across different sources.
-    
-    Args:
-        hotels: List of hotel dictionaries containing hotel information
-        
-    Returns:
-        Dictionary with hotel names as keys and lists of hotel data as values
+    Group hotels by their fuzzy-matched names.
     """
-    grouped_hotels = defaultdict(list)
+    grouped_hotels = []
     
     for hotel in hotels:
-        name = hotel.get('hotel_name', '').strip().lower()
-        if name:  # Only add hotels with valid names
-            grouped_hotels[name].append(hotel)
+        raw_name = hotel.get('hotel_name', '')
+        normalized_name = normalize_hotel_name(raw_name)
+        
+        if not normalized_name:
+            continue
+
+        matched_group = None
+        
+        for group in grouped_hotels:
+            representative_name = group['name']
+            similarity = fuzz.ratio(normalized_name, representative_name)
+            if similarity >= 75:  # threshold for considering names as similar
+                matched_group = group
+                break
+        
+        if matched_group:
+            matched_group['hotels'].append(hotel)
+        else:
+            grouped_hotels.append({'name': normalized_name, 'hotels': [hotel]})
     
-    return dict(grouped_hotels)
+    # Convert to the final dictionary format
+    result = {}
+    for group in grouped_hotels:
+        result[group['name']] = group['hotels']
+    
+    return result
 
 def organize_hotel_comparison(grouped_hotels: Dict[str, List[Dict[str, Any]]]) -> List[Dict[str, Any]]:
     """
@@ -39,9 +68,12 @@ def organize_hotel_comparison(grouped_hotels: Dict[str, List[Dict[str, Any]]]) -
         # Find the best price among all sources
         best_price = min(hotel['price'] for hotel in hotels)
         
+        # Use the most complete name as the display name
+        display_name = max(hotels, key=lambda x: len(x['hotel_name']))['hotel_name']
+        
         # Create comparison entry
         comparison_entry = {
-            'hotel_name': hotel_name.title(),
+            'hotel_name': display_name,
             'best_price': best_price,
             'sources': []
         }
