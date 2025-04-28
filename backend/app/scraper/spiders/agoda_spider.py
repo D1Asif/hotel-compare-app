@@ -127,6 +127,27 @@ class AgodaSpider(scrapy.Spider):
 
         self.driver.get(self.start_url)
 
+        separator_found = False
+        scroll_pause_time = 2
+        max_scroll_attempts = 10  # Prevent infinite scrolling
+        scroll_attempts = 0
+
+        while not separator_found and scroll_attempts < max_scroll_attempts:
+            try:
+                separator_element = self.driver.find_element(By.CSS_SELECTOR, '.ListSeparator')
+                separator_found = True
+                # Scroll the separator element into view
+                self.driver.execute_script("arguments[0].scrollIntoView({behavior: 'smooth', block: 'start'});", separator_element)
+                time.sleep(1)  # Give time for smooth scroll to complete
+            except:
+                # Scroll by a larger amount
+                self.driver.execute_script("window.scrollBy(0, 800)")
+                time.sleep(scroll_pause_time)
+                scroll_attempts += 1
+
+        if not separator_found:
+            print("Warning: Could not find separator element after maximum scroll attempts")
+
         time.sleep(5)
 
         # Debug: Try to find elements using Selenium first
@@ -155,15 +176,15 @@ class AgodaSpider(scrapy.Spider):
                     image = hotel.css('[data-element-name="ssrweb-mainphoto"] img::attr(src)').get()
                     booking_url = hotel.css('[data-element-name="property-card-content"]::attr(href)').get()
                     
-                    
+                    print(price_text)
                     # Convert price to float
                     price = float(price_text.replace('BDT', '').replace(',', '').strip())
                     
                     # Apply filters
-                    # if (self.min_price and price < self.min_price) or \
-                    #    (self.max_price and price > self.max_price) or \
-                    #    (self.star_rating and rating != self.star_rating):
-                    #     continue
+                    if (self.min_price and price < self.min_price) or \
+                       (self.max_price and price > self.max_price) or \
+                       (self.star_rating and rating != self.star_rating):
+                        continue
                     
                     # Make sure booking_url is absolute
                     booking_url = response.urljoin(booking_url)
